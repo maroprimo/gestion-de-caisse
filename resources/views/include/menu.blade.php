@@ -41,7 +41,7 @@
                 <li>
                     <a href="{{route('admin.produitVente')}}">
                         <span class="pcoded-micon"><i class="ti-shopping-cart-full"></i><b>FC</b></span>
-                        <span class="pcoded-mtext" data-i18n="nav.form-components.main">Produit en vendre</span>
+                        <span class="pcoded-mtext" data-i18n="nav.form-components.main">Produit à vendre</span>
                         <span class="pcoded-mcaret"></span>
                     </a>
                 </li>

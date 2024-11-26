@@ -26,3 +26,5 @@ Route::get('/admin/products/grouped', [ProductsController::class, 'getProductsGr
 
 Route::get('/admin/categories/grouped', [CategoryController::class, 'index']);
 
+Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
+
