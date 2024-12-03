@@ -9,6 +9,9 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\ApprovisionnementsController;
 use App\Http\Controllers\StockIngredient;
+use App\Http\Controllers\ClientController;
+
+
 
 use App\Http\Controllers\StockController;
 /*
@@ -42,7 +45,10 @@ Route::get('admin/create-productingredients', [ProductsController::class, 'creat
 Route::post('admin/create-productingredients', [ProductsController::class, 'storeProductIngredients'])->name('admin.createproductingredient');
 
 
+// ajout clients
 
+Route::get('admin/clients', [ClientController::class, 'create'])->name('admin.createclient');
+Route::post('admin/clients', [ClientController::class, 'store'])->name('admin.storeclient');
 
 
 // categories

@@ -16,7 +16,7 @@ class Ingredient extends Model
             'supplier_id',   // Fournisseur
             'purchase_price',         // Prix de l'ingrédient
     ];
-
+    // plusieurs ingredients appartiennent à plusieurs produits 
     public function products()
     {
         return $this->belongsToMany(Product::class)->withPivot('quantity_needed');
@@ -26,7 +26,8 @@ class Ingredient extends Model
     {
         return $this->belongsTo(Supplier::class);
     }
-
+        
+    // un ingredient a plusieurs unités relation entre ingrdient et unités
     public function unitingredient(){
         return $this->hasMany(UnitIngredient::class);
     }

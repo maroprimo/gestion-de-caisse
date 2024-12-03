@@ -126,7 +126,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="map-google.html">
+                    <a href="{{route('admin.createclient')}}">
                         <span class="pcoded-micon"><i class="ti-crown"></i><b>FC</b></span>
                         <span class="pcoded-mtext" data-i18n="nav.form-components.main">Clients</span>
                         <span class="pcoded-mcaret"></span>

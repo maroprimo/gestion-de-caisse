@@ -10,6 +10,44 @@ Caisse vente direct
 
 <div class="main-body">
     <div class="page-wrapper">
+            <!-- Fenêtre modale -->
+    <div id="modal" class="modal">
+        <span class="close-button">&times;</span>
+        <h5>Liste des clients</h5>
+        <table border="1" width="100%">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Adresse</th>
+                    <th>Téléphone</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="clientTable">
+                <!-- Les lignes seront générées dynamiquement -->
+            </tbody>
+        </table>
+        <h>Ajouter un nouveau client</h5>
+    <form id="addClientForm">
+        <div>
+            <label for="clientName">Nom :</label>
+            <input type="text" id="clientName" name="name" required>
+        </div>
+        <div>
+            <label for="clientAddress">Adresse :</label>
+            <input type="text" id="clientAddress" name="address" required>
+        </div>
+        <div>
+            <label for="clientPhone">Téléphone :</label>
+            <input type="text" id="clientPhone" name="phone" required>
+        </div>
+        <button type="submit">Ajouter et Commander</button>
+    </form>
+ 
+    </div>
+
+    <!-- Overlay (arrière-plan gris) -->
+    <div id="overlay" class="overlay"></div>
 
         <div class="page-body">
           <div class="row">
@@ -37,15 +75,18 @@ Caisse vente direct
                           <div class="card-header">
                                         
                                 <div class="d-inline-block">
-                                    <h5>Vente directe</h5>
+                                    <div class="card-block text-center">
+                                        <button class="btn btn-out-dotted btn-info btn-square" onclick="validatePurchase()">Vente direct</button>
+                                        <button class="btn btn-out-dotted btn-danger btn-square" id="listeCommande">Commandes</button>
+                                    </div>
                                     <!-- ------------ Ticket table -------------- -->
                                     <table class="table table-ticket" id="table">
                                         <thead>
                                             <tr>
-                                                <th class="lib-col">Libelle</th>
-                                                <th>Prix</th>
-                                                <th>Quantite</th>
-                                                <th>Total</th>
+                                                <th class="lib">Libelle</th>
+                                                <th class="lib">Prix</th>
+                                                <th class="lib">Quantite</th>
+                                                <th class="lib">Total</th>
                                                 <th class="deleteIcon">Action</th>
                                             </tr>
                                         </thead>
@@ -55,13 +96,14 @@ Caisse vente direct
                                     </table>
                                     
                                 <div id="total-container">
-                                    <p>Total : <span id="total-amount">$0.00</span></p>
+                                    <p class="total">Total : <span id="total-amount">0.00 Ar</span></p>
                                 </div>
                                 </div>
                                 
 
                               <div class="card-block text-center">
                                   <button class="btn btn-primary btn-outline-primary" onclick="validatePurchase()">Valider</button>
+                                  <button class="btn btn-primary btn-outline-primary" id="openModalButton">Commander</button>
                               </div>
                         </div>
                       </div>
@@ -137,10 +179,10 @@ Caisse vente direct
         });
 
         row.innerHTML = `
-            <td>${name}</td>
-            <td>$${validPrice}</td>
-            <td><input type="number" value="1" min="1" style="width: 60px;" onchange="updateTotal(this, ${validPrice}, ${uniqueKey})"></td>
-            <td><span class="total-price">${validPrice.toFixed(2)}</span></td>
+            <td class="lib">${name}</td>
+            <td class="lib">${validPrice}</td>
+            <td class="lib"><input type="number" value="1" min="1" style="width: 50px;" onchange="updateTotal(this, ${validPrice}, ${uniqueKey})"></td>
+            <td class="lib"><span class="total-price">${validPrice.toFixed(2)}</span></td>
             <td><button class="deleteIcon" onclick="removeRow(this, ${uniqueKey})">❌</button></td>
         `;
 
@@ -176,7 +218,7 @@ Caisse vente direct
     function updateTotalAmount() {
         const totalAmount = cartItems.reduce((total, item) => total + item.subtotal, 0);
         const totalElement = document.getElementById('total-amount');
-        totalElement.textContent = `$${totalAmount.toFixed(2)}`;
+        totalElement.textContent = `Ar ${totalAmount.toFixed(2)}`;
     }
 
     async function validatePurchase() {
@@ -239,7 +281,192 @@ Caisse vente direct
         loadProducts('PM'); // Exemple de catégorie par défaut
     });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = document.getElementById('modal');
+    const overlay = document.getElementById('overlay');
+    const openModalButton = document.getElementById('openModalButton');
+    const closeButton = document.querySelector('.close-button');
+    const clientTable = document.getElementById('clientTable');
+    const addClientForm = document.getElementById('addClientForm');
 
+    // Charger les clients depuis l'API
+    async function loadClientsFromAPI() {
+        try {
+            const response = await fetch('http://gestion-de-caisse.test/api/admin/clients/grouped');
+            if (!response.ok) {
+                throw new Error(`Erreur lors du chargement des clients : ${response.statusText}`);
+            }
+
+            clients = await response.json();
+
+            // Afficher les clients dans le tableau
+            clientTable.innerHTML = ''; // Réinitialiser la table
+            clients.forEach(client => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${client.name}</td>
+                    <td>${client.adresse}</td>
+                    <td>${client.tel}</td>
+                    <td><button class="select-client" data-id="${client.id}">Sélectionner</button></td>
+                `;
+                clientTable.appendChild(row);
+            });
+
+        } catch (error) {
+            console.error('Erreur :', error);
+            clientTable.innerHTML = '<tr><td colspan="4">Impossible de charger les clients.</td></tr>';
+        }
+    }
+
+    loadClientsFromAPI();
+ 
+
+    // Ouvrir la modale
+        openModalButton.addEventListener('click', function () {
+        modal.classList.add('active');
+        overlay.classList.add('active');
+
+        loadClientsFromAPI();
+    });
+
+    // Fermer la modale au clic sur la croix
+    closeButton.addEventListener('click', function () {
+        modal.classList.remove('active');
+        overlay.classList.remove('active');
+    });
+
+    // Fermer la modale en cliquant en dehors du contenu
+    window.addEventListener('click', function (event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+
+    // Sélectionner un client
+    clientTable.addEventListener('click', function (e) {
+        if (e.target.classList.contains('select-client')) {
+            const clientId = e.target.getAttribute('data-id');
+            const client = clients.find(c => c.id == clientId);
+
+            // Simuler la création de la commande
+            alert(`Commande créée pour ${client.name}`);
+            
+            // Envoyer au backend
+            fetch('/api/commandes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ client_id: client.id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Commande créée:', data);
+                modal.classList.remove('active');
+                overlay.classList.remove('active');
+            })
+            .catch(error => console.error('Erreur:', error));
+        }
+    });
+
+    // Ajouter un nouveau client
+    addClientForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const newClient = {
+            name: document.getElementById('clientName').value,
+            address: document.getElementById('clientAddress').value,
+            phone: document.getElementById('clientPhone').value,
+        };
+
+        // Envoyer les données au backend
+        fetch('/api/clients', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newClient),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Client ajouté:', data);
+            clients.push(data.client); // Ajouter le client à la liste
+            loadClients(); // Mettre à jour le tableau des clients
+
+            // Simuler la création de commande avec le nouveau client
+            return fetch('/api/commandes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ client_id: data.client.id }),
+            });
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Commande créée avec le nouveau client.');
+            modal.classList.remove('active');
+            overlay.classList.remove('active');
+        })
+        .catch(error => console.error('Erreur:', error));
+    });
+});
+
+</script>
+
+<style>
+    /* Styles pour la modale */
+    .lib {
+        color: #fff;    
+        font-size: 12px;
+    }
+    .deleteIcon{
+        color:#fff;    
+        font-size: 12px; 
+    }
+    .total{
+        color:#fff;    
+        font-size: 15px; 
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        height: 400px;
+        transform: translate(-50%, -50%);
+        border-radius: 8px;
+        background: white;
+        padding: 20px;
+        border: 1px solid #ccc;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+    .modal.active {
+        display: block;
+    }
+    .modal .close-button {
+        
+        margin-top: 10px;
+        background: #FC6180;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+    .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+    .overlay.active {
+        display: block;
+    }
+    .modal h5{
+        font-size: 15px;
+        text-align: center;
+    }
+</style>
 
     
 @endsection

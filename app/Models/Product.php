@@ -25,6 +25,7 @@ class Product extends Model
         }
 
                // Définir la relation avec la table des prix
+               // un produit peut avoir plusieurs prix
             public function prices()
             {
                 return $this->hasMany(ProductPrice::class, 'product_id');
@@ -36,12 +37,13 @@ class Product extends Model
             {
                 return $this->belongsToMany(Ingredient::class)->withPivot('quantity_needed');
             }
-
+            // un enregistrement (un produit) peut être vendu plusieurs fois
             public function sales()
             {
                 return $this->hasMany(Sale::class);
             }
-
+            // un produits peut avoir plusieurs enregstrement dans la table productIngredients
+            // product_id 29 correspond à ingredient_id: 1,2,3...etc
 
             public function productIngredients()
                 {
@@ -52,7 +54,8 @@ class Product extends Model
 
             public function calculateIngredientCost()
             {
-                // Calcule la somme des coûts des ingrédients pour ce produit
+                // Calcule la somme des coûts des ingrédients utilisé pour ce produit
+                // le calcule se fait dansla table productingredients
                 return $this->productIngredients->sum('ingredient_cost');
             }
 

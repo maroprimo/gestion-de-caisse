@@ -11,6 +11,8 @@ class Sale extends Model
 
     protected $fillable = ['sale_date', 'total_amount'];
 
+    // Chaque instance de ce modèle est associée à une seule instance du modèle Product.
+
     public function product()
     {
         return $this->belongsTo(Product::class);

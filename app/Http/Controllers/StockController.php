@@ -15,7 +15,7 @@ class StockController extends Controller
     //
     public function showStock()
     {
-        // Récupérer toutes les informations de stock, incluant l'ingrédient associé c'est deux propriégé sont définie dans relation
+        // Récupérer toutes les informations de stock, incluant l'ingrédient associé c'est deux propriété sont définie dans relation
         $stockData = StockIngredient::with('ingredient', 'unitIngredient')->get();
 
         // Retourner la vue avec les données

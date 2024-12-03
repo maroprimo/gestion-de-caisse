@@ -9,6 +9,8 @@ class Category extends Model
 {
     use HasFactory;
 
+    // une categories a plusieurs sous categories
+
     public function subCategories()
     {
         return $this->hasMany(Category::class, 'parent_id');

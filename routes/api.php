@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ClientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,4 +28,6 @@ Route::get('/admin/products/grouped', [ProductsController::class, 'getProductsGr
 Route::get('/admin/categories/grouped', [CategoryController::class, 'index']);
 
 Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
+
+Route::get('/admin/clients/grouped', [ClientController::class, 'index']);
 

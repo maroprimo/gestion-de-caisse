@@ -28,7 +28,7 @@ class SuppliersController extends Controller
             'contact' => 'required|string',
             'address' => 'required|string',
         ]);
-        // Créer la catégorie principale
+        // Enregistrer
         $supplier = new Supplier();
         $supplier->name = $request->input('name');
         $supplier->contact = $request->input('contact');

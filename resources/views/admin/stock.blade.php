@@ -69,8 +69,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         lowStockItems.forEach(item => {
             const ingredientName = item.querySelector('td:nth-child(2)').innerText;
-            const currentStock = item.querySelector('td:nth-child(4)').innerText;
-            message += `${ingredientName} - Stock actuel : ${currentStock}<br>`;
+            const currentStock = item.querySelector('td:nth-child(3)').innerText;
+            const unitprincipale = item.querySelector('td:nth-child(4)').innerText;
+            message += `${ingredientName} - Stock actuel : ${currentStock} ${unitprincipale}<br>`;
         });
 
         // Injecter le message dans la modale
