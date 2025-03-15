@@ -71,12 +71,47 @@ Ajout Ingredient
                       <form action="{{ route('ingredients.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">Designation</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control"
-                                placeholder="Nom du produit" name="designation">
-                            </div>
+                        <label class="col-sm-2 col-form-label">Type</label>
+                        <div class="col-sm-10">
+                            <input type="radio" id="contactChoice1" name="produit" value="0" onchange="toggleFields()" />
+                            <label for="contactChoice1">Ingrédient</label>
+
+                            <input type="radio" id="contactChoice2" name="produit" value="1" onchange="toggleFields()" />
+                            <label for="contactChoice2">Produit</label>
                         </div>
+                      </div>
+
+                      <!-- Champ Désignation (par défaut caché) -->
+                      <div class="form-group row" id="designationField" style="display: none;">
+                          <label class="col-sm-2 col-form-label">Désignation</label>
+                          <div class="col-sm-10">
+                              <input type="text" class="form-control" placeholder="Nom du produit" name="designation">
+                          </div>
+                      </div>
+
+                      <!-- Sélection Produit (par défaut caché) -->
+                      <!-- Sélection Produit -->
+                      <div class="form-group row" id="productField" style="display: none;">
+                          <label class="col-sm-2 col-form-label">Produit</label>
+                          <div class="col-sm-10">
+                              <select name="product_id" id="productMerchandise" class="form-control">
+                                  <option value="">-- Sélectionner un produit --</option>
+                                  @foreach($products as $product)
+                                      @if($product->type_produit == 1) 
+                                          <option value="{{ $product->id }}" data-designation="{{ $product->designation }}">
+                                              {{ $product->designation }}
+                                          </option>
+                                      @endif
+                                  @endforeach
+                              </select>
+                          </div>
+                      </div>
+
+                      <!-- Champ caché pour la désignation -->
+                      <input type="hidden" name="designation" id="designationInput">
+
+
+
                         <div class="form-group row">
                           <label class="col-sm-2 col-form-label" for="main-unit">Unité Principale</label>
                           <div class="col-sm-10">
@@ -462,6 +497,20 @@ function searchProduit(query) {
 }*/
 
 </script>
-        
+<script>
+    function toggleFields() {
+        let typeValue = document.querySelector('input[name="produit"]:checked').value;
+        document.getElementById("designationField").style.display = typeValue == "0" ? "block" : "none";
+        document.getElementById("productField").style.display = typeValue == "1" ? "block" : "none";
+    }
+
+    document.getElementById('productMerchandise').addEventListener('change', function() {
+    var selectedOption = this.options[this.selectedIndex];
+    var designation = selectedOption.getAttribute('data-designation');
+
+    document.getElementById('designationInput').value = designation;
+});
+
+</script>      
   @endsection
     

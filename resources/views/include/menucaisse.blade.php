@@ -14,7 +14,7 @@
     // Fonction pour récupérer les catégories depuis l'API
     async function fetchCategories() {
         try {
-            const response = await fetch('http://gestion-de-caisse.test/api/admin/categories/grouped'); // Remplace l'URL par l'URL correcte de ton API
+            const response = await fetch('http://127.0.0.1:8000/api/admin/categories/grouped'); // Remplace l'URL par l'URL correcte de ton API
             if (!response.ok) throw new Error('Erreur lors du chargement des catégories');
             
             const categories = await response.json(); // Stocke les catégories

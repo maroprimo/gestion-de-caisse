@@ -106,40 +106,87 @@ Ajouter ingredient
 
                           </div>
 
-                        <form id="productIngredientForm" method="POST" action="{{route('admin.createproductingredient')}}">
-                            @csrf
-                            <div class="form-group">
-                                
-                                <select name="product_id" id="product" required>
-                                    <!-- Remplissez les options avec vos produits depuis le backend -->
-                                    @foreach($products as $product)
-                                        <option value="{{ $product->id }}">{{ $product->designation }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        
-                            <div id="ingredient-container">
-                                <div class="ingredient-row">
-                                    <div class="form-group">
-                                        <label for="ingredient">Ingrédient</label>
-                                        <select name="ingredients[0][ingredient_id]" class="ingredient" required>
-                                            <!-- Remplissez les options avec vos ingrédients depuis le backend -->
-                                            @foreach($ingredients as $ingredient)
-                                                <option value="{{ $ingredient->id }}">{{ $ingredient->designation }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="quantity">Quantité</label>
-                                        <input type="number" name="ingredients[0][quantity]" class="quantity" step="0.001" required>
-                                    </div>
-                                    <button type="button" class="remove-ingredient" onclick="removeIngredient(this)">Supprimer</button>
-                                </div>
-                            </div>
-                        
-                            <button type="button" id="add-ingredient">Ajouter un ingrédient</button>
-                            <button type="submit">Enregistrer le produit avec ses ingrédients</button>
-                        </form>
+                          <div class="form-group row">
+    <label class="col-sm-2 col-form-label">Type de produit</label>
+    <div class="col-sm-10">
+        <input type="radio" id="contactChoice1" name="produit" value="0" onclick="toggleForm(0)" />
+        <label for="contactChoice1">Produits finis</label>
+
+        <input type="radio" id="contactChoice2" name="produit" value="1" onclick="toggleForm(1)" />
+        <label for="contactChoice2">Produits de marchandises</label>
+    </div>
+</div>
+
+<!-- Formulaire pour Produits finis -->
+<form id="productIngredientFormFinished" method="POST" action="{{route('admin.createproductingredient')}}" style="display: none;">
+    @csrf
+    <div class="form-group">
+    <select name="product_id" id="productFinished" required>
+        @foreach($products as $product)
+            @if($product->type_produit == 0)
+                <option value="{{ $product->id }}">{{ $product->designation }}</option>
+            @endif
+        @endforeach
+    </select>
+</div>
+
+    <div id="ingredient-container">
+        <div class="ingredient-row">
+            <div class="form-group">
+                <label for="ingredient">Ingrédient</label>
+                <select name="ingredients[0][ingredient_id]" class="ingredient" required>
+                    @foreach($ingredients as $ingredient)
+                        <option value="{{ $ingredient->id }}">{{ $ingredient->designation }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="quantity">Quantité</label>
+                <input type="number" name="ingredients[0][quantity]" class="quantity" step="0.001" required>
+            </div>
+            <button type="button" class="remove-ingredient" onclick="removeIngredient(this)">Supprimer</button>
+        </div>
+    </div>
+
+    <button type="button" id="add-ingredient">Ajouter un ingrédient</button>
+    <button type="submit">Enregistrer le produit avec ses ingrédients</button>
+</form>
+
+<!-- Formulaire pour Produits de marchandises -->
+<form id="productIngredientFormMerchandise" method="POST" action="{{route('admin.createproductingredient')}}" style="display: none;">
+    @csrf
+    <div class="form-group">
+    <label for="productMerchandise">Produit</label>
+    <select name="product_id" id="productMerchandise" required>
+        <option value="">-- Sélectionner un produit --</option>
+        @foreach($products as $product)
+            @if($product->type_produit == 1) 
+                <option value="{{ $product->id }}" data-choice="{{ $product->type_produit }}">
+                    {{ $product->designation }}
+                </option>
+            @endif
+        @endforeach
+    </select>
+</div>
+
+<div id="unit-container" style="display: none;">
+    <div class="form-group">
+        <label for="unites">Unité</label>
+        <select name="unite" class="units" id="unites">
+            <option value="">-- Sélectionner une unité --</option>
+            <!-- Les unités seront chargées dynamiquement ici -->
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="quantity">Quantité</label>
+        <input type="number" name="quantity" class="quantity" step="0.001" required>
+    </div>
+</div>
+
+
+    <button type="submit">Enregistrer le produit</button>
+</form>
                         
                     </div>
                     
@@ -190,25 +237,51 @@ Ajouter ingredient
                                 </div></th>
                               
                               
-                            <td style="text-align: center; word-wrap: break-word; ">
-                                <ul>
-                                    @foreach($product->productIngredients as $productIngredient)
-                                    
-                                       <li> <label class="label label-danger">{{ $productIngredient->ingredient->designation }} - Coût: {{ $productIngredient->ingredient_cost }}</label></li>
-                                                                      
-                                    @endforeach
-                                </ul>
-                              </td>
-                            <td style="text-align: center; vertical-align: middle;">{{ number_format($product->calculateIngredientCost(), 2, ',', ' ') }}</td> <!-- Affiche la catégorie associée -->                             
-                            @foreach ($product->prices as $price)
-                                
+                                <td style="text-align: center; word-wrap: break-word;">
+                                    <ul>
+                                        @foreach($product->productIngredients as $productIngredient)
+                                            <li>
+                                                @if ($productIngredient->ingredient)
+                                                    <label class="label label-danger">
+                                                        {{ $productIngredient->ingredient->designation }} - Coût: {{ $productIngredient->ingredient_cost }}
+                                                    </label>
+                                                @else
+                                                    <!-- Afficher l'unité ici si l'ingrédient est null -->
+                                                    <label class="label label-warning">
+                                                    {{ $productIngredient->unite ?? 'Pas d\'unité' }} <!-- Affiche l'unité ou un message alternatif -->
+                                                    </label>
+                                                @endif
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td style="text-align: center; vertical-align: middle;">
+                                    @if ($product->type_produit == 1)
+                                        {{ number_format($product->getPurchasePrice(), 2, ',', ' ') }} €
+                                    @else
+                                        {{ number_format($product->calculateIngredientCost(), 2, ',', ' ') }}
+                                    @endif
+                                </td>
+
+
+
                             
+                            @foreach ($product->prices as $price)
+
+                            
+                                
                             <td style="text-align: center; vertical-align: middle;">{{number_format($price->main_unit_price, 2, ',', ' ')}} Ar</td>
                             @endforeach
                             @php
-                                    $mainUnitPrice = $price->main_unit_price ?? 0;
-                                    $ingredientCost = $product->calculateIngredientCost();
-                                    $benefice = $mainUnitPrice - $ingredientCost;
+                            if ($product->type_produit == 1) {
+                                $mainUnitPrice = $price->main_unit_price ?? 0;
+                                $ingredientCost = $product->getPurchasePrice();
+                                $benefice = $mainUnitPrice - $ingredientCost;
+                            } else {
+                                $mainUnitPrice = $price->main_unit_price ?? 0;
+                                $ingredientCost = $product->calculateIngredientCost();
+                                $benefice = $mainUnitPrice - $ingredientCost;
+                            }
                             @endphp
                             <td style="text-align: center; vertical-align: middle;">{{ number_format($benefice, 2, ',', ' ') }} Ar</td>
                               <td style="text-align: center; vertical-align: middle;">
@@ -241,6 +314,16 @@ Ajouter ingredient
 
 @section('script')
 <script>
+
+function toggleForm(value) {
+    document.getElementById('productIngredientFormFinished').style.display = (value == 0) ? 'block' : 'none';
+    document.getElementById('productIngredientFormMerchandise').style.display = (value == 1) ? 'block' : 'none';
+}
+
+function removeIngredient(element) {
+    element.parentElement.remove();
+}
+
 document.getElementById('add-ingredient').addEventListener('click', addIngredient);
 
 function addIngredient() {
@@ -275,6 +358,38 @@ function removeIngredient(button) {
     button.parentElement.remove();
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    const productMerchandiseSelect = document.querySelector('#productMerchandise'); // Sélecteur du produit
+    const unitContainer = document.getElementById("unit-container");
+    const unitSelect = document.getElementById("unites"); // Sélecteur des unités
+
+    if (productMerchandiseSelect) {
+        productMerchandiseSelect.addEventListener("change", function () {
+            const productId = this.value;
+            const typeProduit = this.options[this.selectedIndex].dataset.choice; // Récupérer type_produit
+
+            if (typeProduit === "1") { // Vérifie si c'est un produit de marchandise
+                unitContainer.style.display = "block"; // Afficher le conteneur des unités
+
+                // Récupérer dynamiquement les unités associées au produit sélectionné
+                fetch(`/get-units/${productId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        unitSelect.innerHTML = '<option value="">-- Sélectionner une unité --</option>';
+                        if (data.main_unit) {
+                            unitSelect.innerHTML += `<option value="${data.main_unit}">${data.main_unit}</option>`;
+                        }
+                        if (data.sub_unit) {
+                            unitSelect.innerHTML += `<option value="${data.sub_unit}">${data.sub_unit}</option>`;
+                        }
+                    })
+                    .catch(error => console.error('Erreur lors de la récupération des unités :', error));
+            } else {
+                unitContainer.style.display = "none"; // Cacher le conteneur si ce n'est pas une marchandise
+            }
+        });
+    }
+});
 </script>
     
 @endsection

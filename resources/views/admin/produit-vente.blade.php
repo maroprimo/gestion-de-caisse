@@ -58,12 +58,9 @@ Produits à vendre
                   <li class="nav-item">
                     <a class="nav-link" data-toggle="tab" href="#profile1" role="tab">Prix</a>
                   </li>
-                  <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#messages1" role="tab">Code barre</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#settings1" role="tab">Settings</a>
-                  </li>
+                  
+                  
+
                 </ul>
                 <div class="tab-content tabs card-block">
                   <div class="tab-pane active" id="home1" role="tabpanel">
@@ -127,6 +124,17 @@ Produits à vendre
                       </div>
                     </div>
                   </div>
+
+                      <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">Type de produit</label>
+                            <div class="col-sm-10">
+                            <input type="radio" id="contactChoice1" name="produit" value="0" />
+                            <label for="contactChoice1">Produits finis</label>
+
+                            <input type="radio" id="contactChoice2" name="produit" value="1" />
+                            <label for="contactChoice2">Produits de marchandises</label>
+                            </div>
+                        </div>
                         <div class="form-group row">
                           <label class="col-sm-2 col-form-label">Photo</label>
                           <div class="col-sm-10">
@@ -303,12 +311,7 @@ Produits à vendre
                   </div>
                   
                   </div>
-                  <div class="tab-pane" id="messages1" role="tabpanel">
-                    <p class="m-0">3. This is Photoshop's version of Lorem IpThis is Photoshop's version of Lorem Ipsum. Proin gravida nibh vel velit auctor aliquet. Aenean sollicitudin, lorem quis bibendum auctor, nisi elit consequat ipsum, nec sagittis sem nibh id elit. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean mas Cum sociis natoque penatibus et magnis dis.....</p>
-                  </div>
-                  <div class="tab-pane" id="settings1" role="tabpanel">
-                    <p class="m-0">4.Cras consequat in enim ut efficitur. Nulla posuere elit quis auctor interdum praesent sit amet nulla vel enim amet. Donec convallis tellus neque, et imperdiet felis amet.</p>
-                  </div>
+                  
                 </div>
               </div>
             </div>

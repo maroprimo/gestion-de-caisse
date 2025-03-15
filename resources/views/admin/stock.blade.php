@@ -27,7 +27,8 @@ Stock des ingredients
                             </thead>
                             <tbody>
                                 @foreach($stockData as $stockItem)
-                                    <tr @if($stockItem->current_stock <= $stockItem->ingredient->seuil) class="low-stock" @endif>
+                                <tr @if($stockItem->ingredient && $stockItem->current_stock <= $stockItem->ingredient->seuil) class="low-stock" @endif>
+
                                         <td>{{ $stockItem->id }}</td>
                                         <td>{{ $stockItem->ingredient->designation ?? 'N/A' }}</td>
                                         <td>{{ $stockItem->current_stock }}</td>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\IngredientSupply;
 
 class ProductIngredient extends Model
 {
@@ -15,6 +16,7 @@ class ProductIngredient extends Model
         'ingredient_id',
         'quantity',
         'ingredient_cost',
+        'unite',
         // ajoutez ici d'autres champs si nécessaire
     ];
 

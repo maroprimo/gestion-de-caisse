@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\IngredientSupply;
+use Illuminate\Support\Facades\Log;
+
 
 class Product extends Model
 {
@@ -35,7 +38,8 @@ class Product extends Model
 
             public function ingredients()
             {
-                return $this->belongsToMany(Ingredient::class)->withPivot('quantity_needed');
+                return $this->belongsToMany(Ingredient::class, 'product_ingredients')
+                            ->withPivot('quantity_needed');
             }
             // un enregistrement (un produit) peut être vendu plusieurs fois
             public function sales()
@@ -60,5 +64,28 @@ class Product extends Model
             }
 
 
+            public function getPurchasePrice()
+            {
+                // Trouver l'ingrédient correspondant à ce produit via product_id
+                $ingredient = Ingredient::where('product_id', $this->id)->first();
+            
+                if ($ingredient) {
+                    // Récupérer le dernier prix d'achat dans ingredient_supplies
+                    $latestSupply = IngredientSupply::where('ingredient_id', $ingredient->id)
+                        ->orderBy('date', 'desc') // On prend le dernier prix enregistré
+                        ->first();
+            
+                    return $latestSupply ? $latestSupply->price : 0; // Retourne le prix ou 0 si aucun enregistrement
+                }
+            
+                return 0; // Si aucun ingrédient associé, on retourne 0
+            }
+               
+            
+            
+            
+            
+            
+            
 
 }

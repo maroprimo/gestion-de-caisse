@@ -86,5 +86,9 @@ Route::get('/admin/depenses', [ApprovisionnementsController::class, 'showExpense
 Route::get('admin/stock', [StockController::class, 'showStock'])->name('admin.stock');
 Route::get('admin/etat', [StockController::class, 'etat'])->name('admin.etat');
 
+Route::get('/get-units/{productId}', [ProductsController::class, 'getUnits']);
+
+
+
 
 

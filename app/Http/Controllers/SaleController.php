@@ -88,27 +88,32 @@ class SaleController extends Controller
 
 // vente produit et reduction stock
 
-        protected function processSale($saleId)
+protected function processSale($saleId)
+{
+    $saleItems = SaleItem::where('sale_id', $saleId)->get();
 
-        {
-            $saleItems = SaleItem::where('sale_id', $saleId)->get();
+    foreach ($saleItems as $item) {
+        // Récupérer les ingrédients pour chaque produit vendu
+        $productIngredients = ProductIngredient::where('product_id', $item->product_id)->get();
 
-            foreach ($saleItems as $item) {
-                // Récupérer les ingrédients pour chaque produit vendu
-                $productIngredients = ProductIngredient::where('product_id', $item->product_id)->get();
+        foreach ($productIngredients as $productIngredient) {
+            $stockingredient = StockIngredient::where('ingredient_id', $productIngredient->ingredient_id)->first();
 
-                foreach ($productIngredients as $productIngredient) {
-                    $stockingredient = StockIngredient::find($productIngredient->ingredient_id);
-
-                    // Calculer la quantité totale à déduire
-                    $requiredQuantity = $productIngredient->quantity * $item->quantity;
-
-                    // Mettre à jour le stock d'ingrédient
-                    $stockingredient->current_stock = max(0, $stockingredient->current_stock - $requiredQuantity);
-                    $stockingredient->save();
-                }
+            if (!$stockingredient) {
+                // Stock introuvable, log ou erreur
+                \Log::error("Stock introuvable pour l'ingrédient ID: {$productIngredient->ingredient_id}");
+                continue; // Passe à l'ingrédient suivant
             }
+
+            // Calculer la quantité totale à déduire
+            $requiredQuantity = $productIngredient->quantity * $item->quantity;
+
+            // Mettre à jour le stock d'ingrédient
+            $stockingredient->current_stock = max(0, $stockingredient->current_stock - $requiredQuantity);
+            $stockingredient->save();
         }
+    }
+}
 
 
 

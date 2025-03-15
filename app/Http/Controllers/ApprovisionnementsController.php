@@ -41,6 +41,7 @@ class ApprovisionnementsController extends Controller
         'quantity' => $request->input('quantity'),
         'price' => $request->input('price'),
         'unit_ingredient_id' => $request->input('unit_ingredient_id'),
+        'unit_ingredient_text' => $request->input('unit_ingredient_text'),
         'total_amount' => $request->input('total_amount'),
         'date' => $request->input('date'),
         'supplier_id' => $request->input('supplier_id'),

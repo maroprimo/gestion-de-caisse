@@ -435,11 +435,19 @@ function searchProduit(query) {
                         }
                     });
                 }
+                // Champ caché pour stocker la valeur texte
+                let unitTextInput = document.createElement('input');
+                unitTextInput.type = 'hidden';
+                unitTextInput.name = 'unit_ingredient_text';
 
+                // Mettre à jour la valeur texte lorsqu'une option est sélectionnée
+                unitSelect.addEventListener('change', function () {
+                    unitTextInput.value = this.options[this.selectedIndex].text;
+                });
                 // Ajouter le select au conteneur
                 selectContainer.appendChild(unitSelect);
                 formGroup.appendChild(selectContainer);
-
+                formGroup.appendChild(unitTextInput);
                 // Créer un champ input hidden pour stocker ingredient.id
                 let ingredientIdInput = document.createElement('input');
                 ingredientIdInput.type = 'hidden';

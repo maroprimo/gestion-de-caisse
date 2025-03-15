@@ -126,7 +126,7 @@ Caisse vente direct
 
     async function fetchProducts() {
         try {
-            const response = await fetch('http://gestion-de-caisse.test/api/admin/products/grouped');
+            const response = await fetch('http://127.0.0.1:8000/api/admin/products/grouped');
             if (!response.ok) throw new Error('Erreur lors du chargement des produits');
             productsData = await response.json();
             console.log('Données des produits chargées:', productsData);

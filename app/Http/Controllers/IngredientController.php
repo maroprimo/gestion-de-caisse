@@ -7,6 +7,7 @@ use App\Models\Ingredient;
 use App\Models\Unit;
 use App\Models\Supplier;
 use App\Models\UnitIngredient;
+use App\Models\Product;
 
 
 
@@ -14,11 +15,14 @@ class IngredientController extends Controller
 {
     
     public function sauveringredient(Request $request) {
+        //dd($request->all());
         // Validation du formulaire
         $this->validate($request, [
-            'designation' => 'required|string|max:255',
+            'designation' => 'required_if:produit,0|string|max:255', // requis si produit = 0
+            'product_id' => 'required_if:produit,1|nullable|exists:products,id', // requis si produit = 1
             'main_unit' => 'required|string|max:255',
             'seuil' => 'required|numeric',
+            'produit' => 'required|in:0,1',
             'photo' => 'required|image|mimes:JPG,jpg,jpeg,png,gif|max:1999',
             'description' => 'required'
         ]);
@@ -34,16 +38,34 @@ class IngredientController extends Controller
             $fileNameToStore = 'noimage.jpg';
         }
     
-        // Enregistrement du produit dans la base de données
+        // Création de l'instance Ingredient
         $ingredient = new Ingredient();
-        $ingredient->designation = $request->input('designation');
+    
+        if ($request->input('produit') == 0) {
+            // Cas Ingrédient (designation saisie manuellement)
+            $ingredient->designation = $request->input('designation');
+            $ingredient->product_id = null;
+        } else {
+            // Cas Produit (on récupère la désignation du produit sélectionné)
+            $product = Product::find($request->input('product_id'));
+            if ($product) {
+                $ingredient->designation = $product->designation;
+                $ingredient->product_id = $product->id;
+            } else {
+                return redirect()->back()->with('error', 'Produit sélectionné introuvable.');
+            }
+        }
+    
         $ingredient->seuil = $request->input('seuil');
         $ingredient->photo = $fileNameToStore;
+        $ingredient->type = $request->input('produit');
         $ingredient->description = $request->input('description');
         $ingredient->save();
     
 
-        //$unit->conversion_rate = 1; // valeur par défaut pour l'unité principale
+
+
+       //$unit->conversion_rate = 1; // valeur par défaut pour l'unité principale
         //$unit->save();
     
         // Vérifier si des sous-unités existent
@@ -85,17 +107,19 @@ class IngredientController extends Controller
             $unit->save();
         }
 
-
-
-    return redirect()->back()->with('success', 'Produit et sous-unités enregistrés avec succès.');
+    
+        return redirect()->back()->with('success', 'Produit ou Ingrédient enregistré avec succès.');
     }
+    
 
+    
 
 
     public function index()
     {
         // Récupérer tous les produits avec leurs prix, catégories et unités
         $ingredients = Ingredient::all();   
+        $products = Product::all();
 
         
 
@@ -103,7 +127,7 @@ class IngredientController extends Controller
         $unitingredients = UnitIngredient::all();
 
         // Passer toutes les données à la vue
-        return view('admin.create-ingredient', compact('ingredients', 'unitingredients'));
+        return view('admin.create-ingredient', compact('ingredients', 'unitingredients', 'products'));
     }
 
     

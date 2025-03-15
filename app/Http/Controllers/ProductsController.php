@@ -22,6 +22,7 @@ class ProductsController extends Controller
             'designation' => 'required|string|max:255',
             'main_unit' => 'required|string|max:255',
             'seuil' => 'required|numeric',
+            'produit' => 'required|in:0,1',
             'category_id' => 'required|exists:categories,id',
             'photo' => 'required|image|mimes:JPG,jpg,jpeg,png,gif|max:1999',
             'description' => 'required'
@@ -43,6 +44,7 @@ class ProductsController extends Controller
         $product->designation = $request->input('designation');
         //$product->main_unit = $request->input('main_unit');
         $product->seuil = $request->input('seuil');
+        $product->type_produit = $request->input('produit');
         $product->category_id = $request->input('category_id');
         $product->photo = $fileNameToStore;
         $product->description = $request->input('description');
@@ -109,6 +111,9 @@ class ProductsController extends Controller
 
                 // Récupérer toutes les unités
                 $units = Unit::all();
+
+                   // Récupérer toutes les unités
+                $ingredientSupply = ingredientSupply::all();
 
                 // Passer toutes les données à la vue
                 return view('admin.produit-vente', compact('produits', 'categories', 'units'));
@@ -231,9 +236,10 @@ class ProductsController extends Controller
             // ici productIngredient contient une methode ingredient s qui défini la relation avec la table product
             // productIngredient et prices dans product et ingredient dans productIngredients
             $products = Product::with(['productIngredients.ingredient', 'prices'])->get();
-
+             // Récupérer toutes les unités
+            $units = Unit::all();
             $ingredients = Ingredient::all();
-            return view('admin.create-productingredients', compact('products', 'ingredients'));
+            return view('admin.create-productingredients', compact('products', 'ingredients', 'units'));
         }
         
 
@@ -242,36 +248,88 @@ class ProductsController extends Controller
         public function storeProductIngredients(Request $request)
         {
             $productId = $request->input('product_id');
-            $ingredients = $request->input('ingredients');
+            $unit = $request->input('unite'); // Récupérer l'unité
+            $ingredients = $request->input('ingredients', []); // Valeur par défaut : tableau vide
         
-            foreach ($ingredients as $ingredient) {
-                // Récupérer le prix unitaire le plus récent pour cet ingrédient
-                $ingredientSupply = IngredientSupply::where('ingredient_id', $ingredient['ingredient_id'])
-                    ->orderBy('date', 'desc') // Assurez-vous que la date est la plus récente
-                    ->first();
-                    
+            // Vérifier si c'est un produit de type "produit de marchandises"
+            $product = Product::find($productId);
+            
+            // Si le produit est de type "produit de marchandises", on ne traite pas les ingrédients
+            if ($product && $product->type_produit == '1') {
+                ProductIngredient::create([
+                    'product_id' => $productId,
+                    'ingredient_id' => null, // Aucun ingrédient
+                    'quantity' => 1, // Quantité par défaut ou calculée
+                    'ingredient_cost' => null, // Aucun coût pour les produits de marchandises
+                    'unite' => $unit, // L'unité peut être renseignée
+                ]);
         
-                if ($ingredientSupply) {
-                    // Calculer le coût total pour cet ingrédient
-                    $ingredientCost = $ingredientSupply->price * $ingredient['quantity'];
-        
-                    // Créer une nouvelle entrée dans la table product_ingredients
-                    ProductIngredient::create([
-                        'product_id' => $productId,
-                        'ingredient_id' => $ingredient['ingredient_id'],
-                        'quantity' => $ingredient['quantity'],
-                        'ingredient_cost' => $ingredientCost, // Stocker le coût de cet ingrédient dans product_ingredients
-                    ]);
-                    
-                }
+                return redirect()->back()->with('success', 'Produit de marchandises ajouté avec succès!');
             }
         
-            return redirect()->back()->with('success', 'Ingrédients ajoutés au produit avec succès !');
+            // Si des ingrédients sont envoyés
+            if (!empty($ingredients)) {
+                foreach ($ingredients as $ingredient) {
+                    $ingredientId = $ingredient['ingredient_id'] ?? null;
+                    $ingredientCost = null;
+        
+                    if ($ingredientId) {
+                        $ingredientSupply = IngredientSupply::where('ingredient_id', $ingredientId)
+                            ->orderBy('date', 'desc')
+                            ->first();
+        
+                        if ($ingredientSupply) {
+                            $ingredientCost = $ingredientSupply->price * $ingredient['quantity'];
+                        }
+                    }
+
+        
+                    
+                    ProductIngredient::create([
+                        'product_id' => $productId,
+                        'ingredient_id' => $ingredientId,
+                        'quantity' => $ingredient['quantity'],
+                        'ingredient_cost' => $ingredientCost,
+                        'unite' => $unit, // L'unité renseignée
+                    ]);
+
+                }
+        
+                return redirect()->back()->with('success', 'Ingrédients ajoutés au produit avec succès!');
+            }
+        
+            return redirect()->back()->with('error', 'Aucun ingrédient sélectionné.');
+        }
+        
+
+
+
+        public function getUnits($productId): JsonResponse
+        {
+            try {
+                // Vérifie si le produit existe
+                $product = Product::find($productId);
+                if (!$product) {
+                    return response()->json(['error' => 'Produit non trouvé'], 404);
+                }
+        
+                // Récupère les unités associées au produit
+                $units = Unit::where('product_id', $productId)->first();
+        
+                if (!$units) {
+                    return response()->json(['error' => 'Aucune unité trouvée'], 404);
+                }
+        
+                // Retourne les unités au format JSON
+                return response()->json([
+                    'main_unit' => $units->main_unit,
+                    'sub_unit' => $units->sub_unit ?? null  // Gérer le cas où sub_unit est NULL
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
         }
 
-
-
-
-
-
 }
+
+
