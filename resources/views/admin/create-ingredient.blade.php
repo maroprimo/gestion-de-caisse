@@ -85,7 +85,7 @@ Ajout Ingredient
                       <div class="form-group row" id="designationField" style="display: none;">
                           <label class="col-sm-2 col-form-label">Désignation</label>
                           <div class="col-sm-10">
-                              <input type="text" class="form-control" placeholder="Nom du produit" name="designation">
+                              <input type="text" class="form-control" placeholder="Nom du produit" name="designationp">
                           </div>
                       </div>
 
@@ -108,7 +108,7 @@ Ajout Ingredient
                       </div>
 
                       <!-- Champ caché pour la désignation -->
-                      <input type="hidden" name="designation" id="designationInput">
+                      <input type="hidden" name="designation" id="designationInput" value="">
 
 
 
@@ -507,9 +507,9 @@ function searchProduit(query) {
     document.getElementById('productMerchandise').addEventListener('change', function() {
     var selectedOption = this.options[this.selectedIndex];
     var designation = selectedOption.getAttribute('data-designation');
-
-    document.getElementById('designationInput').value = designation;
+    document.getElementById('designationInput').value = designation ? designation : '';
 });
+
 
 </script>      
   @endsection

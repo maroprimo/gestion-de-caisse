@@ -77,8 +77,14 @@
                   <i class="ti-lock"></i>Lock Screen </a>
               </li>
               <li>
-                <a href="auth-normal-sign-in.html">
-                  <i class="ti-layout-sidebar-left"></i>Logout </a>
+              <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                  @csrf
+              </form>
+
+              <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+              <i class="ti-layout-sidebar-left"></i>Logout </a>
+              
+                  
               </li>
             </ul>
           </li>

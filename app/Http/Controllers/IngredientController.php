@@ -15,10 +15,11 @@ class IngredientController extends Controller
 {
     
     public function sauveringredient(Request $request) {
+
         //dd($request->all());
         // Validation du formulaire
         $this->validate($request, [
-            'designation' => 'required_if:produit,0|string|max:255', // requis si produit = 0
+            'designationp' => 'required_if:produit,0|string|max:255', // requis si produit = 0
             'product_id' => 'required_if:produit,1|nullable|exists:products,id', // requis si produit = 1
             'main_unit' => 'required|string|max:255',
             'seuil' => 'required|numeric',
@@ -43,7 +44,7 @@ class IngredientController extends Controller
     
         if ($request->input('produit') == 0) {
             // Cas Ingrédient (designation saisie manuellement)
-            $ingredient->designation = $request->input('designation');
+            $ingredient->designation = $request->input('designationp');
             $ingredient->product_id = null;
         } else {
             // Cas Produit (on récupère la désignation du produit sélectionné)
