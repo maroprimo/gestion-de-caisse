@@ -330,6 +330,29 @@ class ProductsController extends Controller
             }
         }
 
+
+
+        // AP product par catégorie
+
+        public function getProductsByCategory($category_id)
+            {
+                // Vérifier si la catégorie existe
+                $category = Category::find($category_id);
+
+                if (!$category) {
+                    return response()->json(['message' => 'Catégorie non trouvée'], 404);
+                }
+
+                // Récupérer les produits liés à cette catégorie
+                $products = Product::where('category_id', $category_id)->get();
+
+                // Retourner la réponse en JSON
+                return response()->json([
+                    'category' => $category->name,
+                    'products' => $products
+                ]);
+            }
+
 }
 
 

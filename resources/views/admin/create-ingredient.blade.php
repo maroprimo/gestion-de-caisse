@@ -514,3 +514,8 @@ function searchProduit(query) {
 </script>      
   @endsection
     
+
+
+
+
+  

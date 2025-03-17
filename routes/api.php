@@ -31,3 +31,8 @@ Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
 
 Route::get('/admin/clients/grouped', [ClientController::class, 'index']);
 
+
+
+
+Route::get('/products/{category_id}', [ProductsController::class, 'getProductsByCategory']);
+
