@@ -15,12 +15,12 @@ class IngredientController extends Controller
 {
     
     public function sauveringredient(Request $request) {
-
-        //dd($request->all());
         // Validation du formulaire
+        //dd($request->all());
         $this->validate($request, [
             'designationp' => 'required_if:produit,0|string|max:255', // requis si produit = 0
             'product_id' => 'required_if:produit,1|nullable|exists:products,id', // requis si produit = 1
+             'designation' => 'required_if:produit,1|string|max:255', // requis si produit = 1
             'main_unit' => 'required|string|max:255',
             'seuil' => 'required|numeric',
             'produit' => 'required|in:0,1',
@@ -50,8 +50,8 @@ class IngredientController extends Controller
             // Cas Produit (on récupère la désignation du produit sélectionné)
             $product = Product::find($request->input('product_id'));
             if ($product) {
-                $ingredient->designation = $product->designation;
-                $ingredient->product_id = $product->id;
+                $ingredient->designation = $request->input('designation'); // Utilisez la désignation du champ caché
+                $ingredient->product_id = $request->input('product_id');
             } else {
                 return redirect()->back()->with('error', 'Produit sélectionné introuvable.');
             }
@@ -62,55 +62,55 @@ class IngredientController extends Controller
         $ingredient->type = $request->input('produit');
         $ingredient->description = $request->input('description');
         $ingredient->save();
+        
     
-
-
-
-       //$unit->conversion_rate = 1; // valeur par défaut pour l'unité principale
-        //$unit->save();
     
-        // Vérifier si des sous-unités existent
-        if ($request->has('subUnit') && $request->has('conversionRate')) {
-            $subUnits = $request->input('subUnit');
-            $conversionRates = $request->input('conversionRate');
     
-            foreach ($subUnits as $index => $subUnitName) {
-                if (!empty($subUnitName) && isset($conversionRates[$index])) {
-                    $conversionRate = $conversionRates[$index];
+           //$unit->conversion_rate = 1; // valeur par défaut pour l'unité principale
+            //$unit->save();
+        
+            // Vérifier si des sous-unités existent
+            if ($request->has('subUnit') && $request->has('conversionRate')) {
+                $subUnits = $request->input('subUnit');
+                $conversionRates = $request->input('conversionRate');
+        
+                foreach ($subUnits as $index => $subUnitName) {
+                    if (!empty($subUnitName) && isset($conversionRates[$index])) {
+                        $conversionRate = $conversionRates[$index];
+        
+                        // Créez et enregistrez chaque sous-unité
+                        $subUnit = new UnitIngredient();
+                        $subUnit->sub_unit = $subUnitName;
+                        $subUnit->conversion_rate = $conversionRate;
     
-                    // Créez et enregistrez chaque sous-unité
-                    $subUnit = new UnitIngredient();
-                    $subUnit->sub_unit = $subUnitName;
-                    $subUnit->conversion_rate = $conversionRate;
-
+                    }
                 }
-            }
-
-            
-            // Enregistrement de l'unité principale
-            $unit = new UnitIngredient();
-            $unit->main_unit = $request->input('main_unit');
-            $unit->ingredient_id = $ingredient->id;
-            $unit->sub_unit = $subUnitName;
-            $unit->conversion_rate = $conversionRate;
-
-            $unit->save();
-
-        }else{
-            
-            // Enregistrement de l'unité principale
-            $unit = new UnitIngredient();
-            $unit->main_unit = $request->input('main_unit');
-            $unit->ingredient_id = $ingredient->id;
-            $unit->sub_unit = null;
-            $unit->conversion_rate = 1;
-
-            $unit->save();
-        }
-
     
-        return redirect()->back()->with('success', 'Produit ou Ingrédient enregistré avec succès.');
-    }
+                
+                // Enregistrement de l'unité principale
+                $unit = new UnitIngredient();
+                $unit->main_unit = $request->input('main_unit');
+                $unit->ingredient_id = $ingredient->id;
+                $unit->sub_unit = $subUnitName;
+                $unit->conversion_rate = $conversionRate;
+    
+                $unit->save();
+    
+            }else{
+                
+                // Enregistrement de l'unité principale
+                $unit = new UnitIngredient();
+                $unit->main_unit = $request->input('main_unit');
+                $unit->ingredient_id = $ingredient->id;
+                $unit->sub_unit = null;
+                $unit->conversion_rate = 1;
+    
+                $unit->save();
+            }
+    
+        
+            return redirect()->back()->with('success', 'Produit ou Ingrédient enregistré avec succès.');
+        }
     
 
     

@@ -68,50 +68,32 @@ Ajout Ingredient
                 <div class="tab-content tabs card-block">
                   <div class="tab-pane active" id="home1" role="tabpanel">
                     <div class="card-block">
-                      <form action="{{ route('ingredients.store') }}" method="POST" enctype="multipart/form-data">
+<!-- Choix du type de produit -->
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">Type</label>
+    <div class="col-sm-10">
+        <input type="radio" id="contactChoice1" name="produit" value="0" onchange="toggleForms()" />
+        <label for="contactChoice1">Ingrédient</label>
+
+        <input type="radio" id="contactChoice2" name="produit" value="1" onchange="toggleForms()" />
+        <label for="contactChoice2">Produit</label>
+    </div>
+</div>
+
+<!-- Formulaire pour Ingrédient (produit = 0) -->
+                    <form action="{{ route('ingredients.store') }}" method="POST" enctype="multipart/form-data" id="formIngredient" style="display: none;">
                         @csrf
+                        <input type="hidden" name="produit" value="0">
+                    
                         <div class="form-group row">
-                        <label class="col-sm-2 col-form-label">Type</label>
-                        <div class="col-sm-10">
-                            <input type="radio" id="contactChoice1" name="produit" value="0" onchange="toggleFields()" />
-                            <label for="contactChoice1">Ingrédient</label>
-
-                            <input type="radio" id="contactChoice2" name="produit" value="1" onchange="toggleFields()" />
-                            <label for="contactChoice2">Produit</label>
+                            <label class="col-sm-2 col-form-label">Désignation</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" placeholder="Nom du produit" name="designationp" required>
+                            </div>
                         </div>
-                      </div>
-
-                      <!-- Champ Désignation (par défaut caché) -->
-                      <div class="form-group row" id="designationField" style="display: none;">
-                          <label class="col-sm-2 col-form-label">Désignation</label>
-                          <div class="col-sm-10">
-                              <input type="text" class="form-control" placeholder="Nom du produit" name="designationp">
-                          </div>
-                      </div>
-
-                      <!-- Sélection Produit (par défaut caché) -->
-                      <!-- Sélection Produit -->
-                      <div class="form-group row" id="productField" style="display: none;">
-                          <label class="col-sm-2 col-form-label">Produit</label>
-                          <div class="col-sm-10">
-                              <select name="product_id" id="productMerchandise" class="form-control">
-                                  <option value="">-- Sélectionner un produit --</option>
-                                  @foreach($products as $product)
-                                      @if($product->type_produit == 1) 
-                                          <option value="{{ $product->id }}" data-designation="{{ $product->designation }}">
-                                              {{ $product->designation }}
-                                          </option>
-                                      @endif
-                                  @endforeach
-                              </select>
-                          </div>
-                      </div>
-
-                      <!-- Champ caché pour la désignation -->
-                      <input type="hidden" name="designation" id="designationInput" value="">
-
-
-
+                    
+                        <!-- Autres champs pour produit 0 -->
+                    
                         <div class="form-group row">
                           <label class="col-sm-2 col-form-label" for="main-unit">Unité Principale</label>
                           <div class="col-sm-10">
@@ -151,6 +133,72 @@ Ajout Ingredient
                             <i class="icofont icofont-save"></i>Sauver</button>
                         </div>
                       </form>
+                      
+<!-- Formulaire pour Produit fini (produit = 1) -->
+<form action="{{ route('ingredients.store') }}" method="POST" enctype="multipart/form-data" id="formProduct" style="display: none;">
+    @csrf
+    <input type="hidden" name="produit" value="1">
+
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Produit</label>
+        <div class="col-sm-10">
+            <select name="product_id" id="productMerchandise" class="form-control" required>
+                <option value="">-- Sélectionner un produit --</option>
+                @foreach($products as $product)
+                    @if($product->type_produit == 1)
+                        <option value="{{ $product->id }}" data-designation="{{ $product->designation }}">
+                            {{ $product->designation }}
+                        </option>
+                    @endif
+                @endforeach
+            </select>
+        </div>
+    </div>
+
+    <!-- Champ caché pour la désignation -->
+    <input type="hidden" name="designation" id="designationInput" value="">
+
+    <!-- Autres champs pour Produit fini -->
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="main-unit">Unité Principale</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="main-unit" placeholder="Entrez l'unité principale (ex. Cartouche)" name="main_unit">
+            <button onclick="addSubUnit(event)">+ Ajouter sous-unité</button>
+            <div id="sub-units"></div>
+            <div class="formula" id="formula-container">
+                <div id="formula-output" class="form-control">
+                    1 <span id="main-unit-display"></span> = 
+                    <input type="hidden" id="quantity" class="number-input" min="1" oninput="updateFormula()">
+                    <span id="sub-unit-display"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Seuil d'alerte</label>
+        <div class="col-sm-10">
+            <input type="number" class="form-control" id="alert-threshold" placeholder="Seuil d'alerte" name="seuil" oninput="updateAlertThreshold()">
+            <span class="form-bg-primary" id="alert-threshold-display"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Photo</label>
+        <div class="col-sm-10">
+            <input type="file" name="photo" class="form-control">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Descriptif</label>
+        <div class="col-sm-10">
+            <textarea rows="5" name="description" cols="5" class="form-control" placeholder="Description produit"></textarea>
+        </div>
+    </div>
+    <div class="form-group row">
+        <button class="btn btn-success btn-outline-success">
+            <i class="icofont icofont-save"></i>Sauver</button>
+    </div>
+</form>                      
+                      
                     </div>
                     <div class="card">
                       <div class="card-header">
@@ -498,20 +546,40 @@ function searchProduit(query) {
 
 </script>
 <script>
-    function toggleFields() {
-        let typeValue = document.querySelector('input[name="produit"]:checked').value;
-        document.getElementById("designationField").style.display = typeValue == "0" ? "block" : "none";
-        document.getElementById("productField").style.display = typeValue == "1" ? "block" : "none";
+function toggleForms() {
+    var produit = document.querySelector('input[name="produit"]:checked').value;
+    if (produit == 0) {
+        document.getElementById('formIngredient').style.display = 'block';
+        document.getElementById('formProduct').style.display = 'none';
+    } else {
+        document.getElementById('formIngredient').style.display = 'none';
+        document.getElementById('formProduct').style.display = 'block';
     }
+}
 
-    document.getElementById('productMerchandise').addEventListener('change', function() {
-    var selectedOption = this.options[this.selectedIndex];
-    var designation = selectedOption.getAttribute('data-designation');
-    document.getElementById('designationInput').value = designation ? designation : '';
+// Appeler la fonction au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    toggleForms(); // Afficher le formulaire approprié au chargement
 });
 
+// Écouter les changements de sélection
+document.querySelectorAll('input[name="produit"]').forEach(function(radio) {
+    radio.addEventListener('change', toggleForms);
+});
 
-</script>      
+document.getElementById('productMerchandise').addEventListener('change', function() {
+    // Récupérer l'option sélectionnée
+    var selectedOption = this.options[this.selectedIndex];
+
+    // Récupérer la désignation depuis l'attribut data-designation
+    var designation = selectedOption.getAttribute('data-designation');
+
+    // Mettre à jour la valeur du champ caché
+    document.getElementById('designationInput').value = designation;
+});
+
+</script>
+
   @endsection
     
 
